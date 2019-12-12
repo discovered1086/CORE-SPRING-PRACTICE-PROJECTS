@@ -1,0 +1,98 @@
+package com.kingshuk.spring.aspectpractice.aop.aroundadvice;
+
+import java.util.Date;
+import java.util.logging.Logger;
+
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import com.kingshuk.spring.aspectpractice.aop.aroundadvice.beans.ClaimBenefits;
+import com.kingshuk.spring.aspectpractice.aop.aroundadvice.beans.ClaimEvent;
+import com.kingshuk.spring.aspectpractice.aop.aroundadvice.beans.Insured;
+import com.kingshuk.spring.aspectpractice.aop.aroundadvice.service.ClaimsBusinessService;
+import com.kingshuk.spring.aspectpractice.config.AOPConfigForAroundAdvice;
+
+/**
+ * A test harness to practice the aspect created for claims
+ * Created by CO21321 on 2/12/2018.
+ */
+
+public class InsuredAspectTestHarness {
+
+    private static Logger logger=Logger.getLogger(InsuredAspectTestHarness.class.getName());
+
+    public static void main(String[] args) {
+
+        /**
+         * Step 1:  Getting the configuration from the java config file to create the container
+         */
+
+        AnnotationConfigApplicationContext annotationConfigApplicationContext =
+                new AnnotationConfigApplicationContext(AOPConfigForAroundAdvice.class);
+
+        /**
+         * Step 2: Getting the bean from the container
+         */
+
+        ClaimsBusinessService businessService = annotationConfigApplicationContext.getBean("ClaimsBusinessService", ClaimsBusinessService.class);
+
+
+        Insured insured = new Insured();
+        insured.setFirstName("Kingshuk");
+        insured.setLastName("Mukherjee");
+        insured.setEmployeeId(232649);
+        insured.setInsuredId(232649);
+        insured.setDob("10/16/1986");
+
+        ClaimEvent event = new ClaimEvent();
+        event.setClaimEventId(11564654);
+        event.setInsured(insured);
+        event.setClaimType("STD");
+        event.setClaimRaisedDate(new Date());
+        event.setClaimStatus("APPROVED");
+
+        ClaimBenefits claimBenefits = new ClaimBenefits();
+        claimBenefits.setClaimEventId(11564654);
+        claimBenefits.setBenefitStatus("APPROVED");
+        claimBenefits.setBenefitAmount(780.00);
+
+        /**
+         * Step 3: Calling the methods on the bean
+         */
+        businessService.addANewInsured(insured);
+
+        businessService.createANewClaim(event);
+
+        //businessService.getAllInsuredClaims(insured);
+
+        //businessService.getAllBenefitAmountsForInsured(insured.getInsuredId());
+
+        //businessService.getBenefitDetailsForClaim(event.getClaimEventId());
+
+        //businessService.viewAllInsured();
+
+        //ClaimEvent claimEvent = businessService.viewOneClaim(event.getClaimEventId());
+
+        /*logger.info("\n_____________________________________________________________________\n"+
+        "<<ClaimsAspectTestHarness>> The claimant name is "+claimEvent.getInsured().getFirstName()+" "+claimEvent.getInsured().getLastName());*/
+        try {
+            Insured queryInsured = businessService.viewOneInsured(232649);
+
+            if (queryInsured != null) {
+                logger.info("\n_____________________________________________________________________\n" +
+                        "<<InsuredAspectTestHarness>> The insured name is " + queryInsured.getFirstName() + " " + queryInsured.getLastName());
+            }
+
+        } catch (Exception ex) {
+            logger.info("<<InsuredAspectTestHarness>> Something went wrong because " + ex.getMessage());
+            ex.printStackTrace();
+        }
+
+
+        /**
+         * Step 4: Finally closing the application context/container
+         */
+        annotationConfigApplicationContext.close();
+    }
+
+
+}
